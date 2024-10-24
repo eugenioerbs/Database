@@ -1,0 +1,58 @@
+
+CREATE TABLE pessoa
+(cd_pessoa INTEGER,
+nm_pessoa VARCHAR(50) NOT NULL, -- não pode ser nullo
+ds_email VARCHAR (50) UNIQUE,  -- Unico, ou seja, nao pode repetir o valor (NO caso ali email)
+fl_ativo CHAR(1) DEFAULT 'S',  -- caso não seja preenchido o campo será inserido S
+dt_nascimento DATE,
+PRIMARY KEY (cd_pessoa)
+);
+
+-- inserindo sem identificação das colunas
+INSERT INTO pessoa VALUES (1, 'pessoa', 'pessoa1@gmail.com', NULL, '200-01-31');
+
+
+-- inserindo ignorando o fl ativo, ele não é obrigatório pois é preenchido com o s quando ignorado, quando
+INSERT INTO pessoa (cd_pessoa, nm_pessoa, dt_nascimento)
+VALUES (2, 'pessoa 2', 'pessoa2@gmail.com', NULL, '200-01-31');
+
+
+-- alterando a tabela para eka adicionar auto_increment
+ALTER TABLE pessoa
+MODIFY COLUMN cd_pessoa INTEGER AUTO_INCREMENT;
+
+
+-- descrevendo a tabela
+DESC pessoa;
+
+
+-- solecionando sados da tabela
+SELECT * FROM pessoa;
+
+
+-- alterando a tabela pessoa 
+ALTER TABLE pessoa
+MODIFY column fl_ativo CHAR(1) CHECK (fl_ativo IN ('S', 'N'));
+
+
+-- alterando dados da tabela pessoa
+UPDATE pessoa
+SET nm_pessoa = pessoa '66',
+	 ds_email = 'pessoa66@gmail.com'
+WHERE cd_pessoa = 6;
+
+
+
+-- eliminando dados de pessoa
+DELETE FROM pessoa
+	WHERE cd_pessoa = 66;
+	
+	
+
+
+
+
+
+
+
+
