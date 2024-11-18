@@ -1,0 +1,176 @@
+-- ----------------------CREATES----------------------------------------------------------------------------------
+
+CREATE TABLE situacao (
+    cd_situacao INT PRIMARY KEY,
+    ds_situacao VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE obra (
+    cd_obra INT PRIMARY KEY,
+    nm_titulo VARCHAR(100),
+    ds_edicao VARCHAR(20),
+    dt_publicacao DATE,
+    ds_sinopse VARCHAR(255)
+);
+
+CREATE TABLE categoria (
+    tp_categoria INT PRIMARY KEY,
+    ds_categoria VARCHAR(30) UNIQUE,
+    nr_exemplares INT
+);
+
+CREATE TABLE usuario (
+    cd_usuario INT PRIMARY KEY,
+    nm_usuario VARCHAR(50),
+    dt_nascimento DATE,
+    ds_email VARCHAR(100),
+    ds_senha VARCHAR(100),
+    tp_categoria INT,
+    FOREIGN KEY (tp_categoria) REFERENCES categoria(tp_categoria)
+);
+
+CREATE TABLE exemplar (
+    nr_exemplar INT PRIMARY KEY,
+    dt_inclusao DATE,
+    cd_obra INT,
+    cd_situacao INT,
+    FOREIGN KEY (cd_obra) REFERENCES obra(cd_obra),
+    FOREIGN KEY (cd_situacao) REFERENCES situacao(cd_situacao)
+);
+
+CREATE TABLE emprestimo (
+    nr_emprestimo INT PRIMARY KEY,
+    dt_emprestimo DATE,
+    cd_usuario INT,
+    FOREIGN KEY (cd_usuario) REFERENCES usuario(cd_usuario)
+);
+
+CREATE TABLE emprestimo_exemplar (
+    nr_emprestimo INT,
+    nr_exemplar INT,
+    dt_prevista_devolucao DATE,
+    dt_devolucao DATE,
+    PRIMARY KEY (nr_emprestimo, nr_exemplar),
+    FOREIGN KEY (nr_emprestimo) REFERENCES emprestimo(nr_emprestimo),
+    FOREIGN KEY (nr_exemplar) REFERENCES exemplar(nr_exemplar)
+);
+
+-- ----------------------INSERTS--------------------------------------------------------------------------------
+
+INSERT INTO situacao (cd_situacao, ds_situacao)
+VALUES 
+(1, 'emprestado'),
+(2, 'disponivel'),
+(3, 'não localizado');
+
+INSERT INTO obra (cd_obra, nm_titulo, ds_edicao, dt_publicacao, ds_sinopse)
+VALUES
+(1, 'Jogos Vorazes', 'vol 1', '2005-05-19', 'Um livro muito emocionante de ação'),
+(2, 'Harry Potter', 'vol 1', '2009-01-28', 'Um livro muito emocionante de fantasia'),
+(3, 'Trono de Vidro', 'vol 1', '2000-01-28', 'Um livro muito emocionante de romance'),
+(4, 'Demon Slayer', 'vol 1', '1999-01-28', 'Um livro muito emocionante de terror'),
+(5, 'Game of thrones', 'vol 1', '1998-01-28', 'Um livro muito emocionante de ação');
+
+INSERT INTO exemplar (nr_exemplar, dt_inclusao, cd_obra, cd_situacao) 
+VALUES
+(1, '2024-01-10', 1, 2),
+(2, '2024-01-11', 1, 1),
+(3, '2024-01-12', 2, 2),
+(4, '2024-01-13', 2, 3),
+(5, '2024-01-14', 3, 2),
+(6, '2024-01-15', 3, 1),
+(7, '2024-01-16', 4, 2),
+(8, '2024-01-17', 4, 2),
+(9, '2024-01-18', 5, 3),
+(10, '2024-01-19', 5, 1);
+
+INSERT INTO categoria (tp_categoria, ds_categoria, nr_exemplares)
+VALUES
+(1, 'estudante', 7),
+(2, 'idoso', 5),
+(3, 'comunidade geral', 3);
+
+INSERT INTO emprestimo (nr_emprestimo, dt_emprestimo, cd_usuario)
+VALUES
+(1, '2024-11-01', 1),
+(2, '2024-11-03', 2),
+(3, '2024-11-05', 3),
+(4, '2024-11-07', 4),
+(5, '2024-11-09', 5),
+(6, '2024-11-11', 1),
+(7, '2024-11-13', 2),
+(8, '2024-11-15', 3),
+(9, '2024-11-17', 4),
+(10, '2024-11-19', 5);
+
+INSERT INTO emprestimo_exemplar (nr_emprestimo, nr_exemplar, dt_prevista_devolucao, dt_devolucao)
+VALUES
+(1, 2, '2024-11-10', '2024-11-09'),
+(2, 3, '2024-11-13', '2024-11-12'),
+(3, 4, '2024-11-15', NULL),
+(4, 5, '2024-11-17', '2024-11-16'),
+(5, 6, '2024-11-19', NULL),
+(6, 7, '2024-11-21', '2024-11-20'),
+(7, 8, '2024-11-23', NULL),
+(8, 10, '2024-11-25', '2024-11-24'),
+(1, 3, '2024-11-27', '2024-11-26'),
+(3, 2, '2024-11-29', NULL);
+
+INSERT INTO usuario (cd_usuario, nm_usuario, dt_nascimento, ds_email, ds_senha, tp_categoria)
+VALUES
+(1, 'Usuario1', '2000-01-01', 'usuario1@example.com', 'senha1', 1),
+(2, 'Usuario2', '2000-02-01', 'usuario2@example.com', 'senha2', 2),
+(3, 'Usuario3', '2000-03-01', 'usuario3@example.com', 'senha3', 1),
+(4, 'Usuario4', '2000-04-01', 'usuario4@example.com', 'senha4', 3),
+(5, 'Usuario5', '2000-05-01', 'usuario5@example.com', 'senha5', 1);
+
+-- ----------------------SELECTS--------------------------------------------------------------------------------
+
+
+SELECT 
+    emprestimo.nr_emprestimo, 
+    emprestimo.cd_usuario, 
+    obra.nm_titulo
+FROM 
+    emprestimo
+INNER JOIN usuario ON emprestimo.cd_usuario = usuario.cd_usuario
+INNER JOIN emprestimo_exemplar ON emprestimo.nr_emprestimo = emprestimo_exemplar.nr_emprestimo
+INNER JOIN exemplar ON emprestimo_exemplar.nr_exemplar = exemplar.nr_exemplar
+INNER JOIN obra ON exemplar.cd_obra = obra.cd_obra
+WHERE 
+    obra.nm_titulo LIKE '%Jogos Vorazes%';
+
+
+SELECT
+	obra.nm_titulo,
+	usuario.nm_usuario
+FROM
+	emprestimo AS e	 
+INNER JOIN usuario ON e.cd_usuario = usuario.cd_usuario
+INNER JOIN emprestimo_exemplar ON e.nr_emprestimo = emprestimo_exemplar.nr_emprestimo
+INNER JOIN exemplar ON emprestimo_exemplar.nr_exemplar = exemplar.nr_exemplar
+INNER JOIN obra ON exemplar.cd_obra = obra.cd_obra
+WHERE 
+	emprestimo_exemplar.dt_devolucao IS NULL;
+	
+
+SELECT 
+    usuario.nm_usuario,
+    categoria.nr_exemplares AS max_emprestimos
+FROM 
+    usuario
+INNER JOIN categoria ON usuario.tp_categoria = categoria.tp_categoria;
+
+
+SELECT 
+    obra.nm_titulo,
+    exemplar.nr_exemplar
+FROM 
+    obra
+INNER JOIN exemplar ON obra.cd_obra = exemplar.cd_obra
+INNER JOIN situacao ON exemplar.cd_situacao = situacao.cd_situacao
+WHERE 
+    situacao.ds_situacao = 'disponivel';
+
+
+
